@@ -12,7 +12,7 @@
 \usepackage[utf8x]{inputenc}
 \usepackage[english,russian]{babel}
 \usepackage{expdlist}
-\usepackage[dvips]{graphicx}
+\usepackage[pdftex]{graphicx}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{amsthm}
@@ -161,26 +161,50 @@
 \newcommand{\p}{\par Здесь будет текст...}
 
 \def\drawfigure#1#2#3{
-        \begin{figure}[H]
-        \centerline{ \includegraphics{pic/#1}}
+        \begin{figure}[ht]
+        \centerline{ \includegraphics[width=8cm]{img/#1}}
         \caption{#2}
         \label{#3}
         \end{figure}
 }
-\def\drawfigurex#1#2#3#4#5{
-        \begin{figure}[#1]
-        \centerline{ \includegraphics[#2]{#3}}
-        \caption{#4}
-        \label{#5}
+\def\drawfigurex#1#2#3#4{
+        \begin{figure}[ht]
+        \centerline{ \includegraphics[#4]{img/#1}}
+        \caption{#2}
+        \label{#3}
         \end{figure}
+}
+
+%\def\fasttable#1#2#3#4{
+%        \begin{table}[ht]
+%        \centerline{
+%        \begin{tabular}[#2]
+%        #3
+%        \end{tabular}
+%        }
+%        \caption{#1}
+%        \label{#4}
+%        \end{table}
+%}
+\newenvironment{fasttable}[3]{%
+    \begin{table}[ht]
+    \centering
+    \renewcommand{\arraystretch}{1.1}
+    \label{#2}
+    \pushQED{#1}%
+    \begin{tabular}{#3}
+}{%
+    \end{tabular}
+    \caption \popQED
+    \end{table}
 }
 
 % Chapters
 \startthechapters
 \input{chapters/intro.tex}
-%\input{chapters/chapter1.tex}
-%\input{parts/chapter2.tex}
-%\input{parts/chapter3.tex}
+\input{chapters/chapter1.tex}
+\input{chapters/chapter2.tex}
+\input{chapters/chapter3.tex}
 %\input{parts/chapter4.tex}
 %\input{parts/outro.tex}
 
