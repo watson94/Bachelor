@@ -40,7 +40,11 @@
 
 \begin{table}[ht]
 \centering
-\begin{tabular}{|r|r|r|r|r|}
+\renewcommand{\arraystretch}{1.1}
+\captionbox{Скорость поиска ближайшего отрезка в миллисекундах
+\label{query_time}
+}{
+\begin{tabular*}{1.0\textwidth}{@{\extracolsep{\fill}} |l|r|r|r|r|}
 \hline
 Алгоритм/количество отрезков & 100 & 1000 & 10000 & 100000 \\
 \hline
@@ -49,14 +53,16 @@ n-grid   & 0.00172 & 0.00165 & 0.00186 & 0.00373 \\
 SVD      & 0.04676 & 0.04495 & 0.07017 & 0.08502 \\
 \hline
 
-\end{tabular}
-\caption{Скорость поиска ближайшего отрезка в миллисекундах}
-\label{query_time}
+\end{tabular*}}
 \end{table}
 
 \begin{table}[ht]
 \centering
-\begin{tabular}{|r|r|r|r|r|}
+\renewcommand{\arraystretch}{1.1}
+\captionbox{Время препроцессирования в секундах
+\label{preproc_time}
+}{
+\begin{tabular*}{1.0\textwidth}{@{\extracolsep{\fill}} |l|r|r|r|r|}
 
 \hline
 Алгоритм/количество отрезков & 100 & 1000 & 10000 & 100000 \\
@@ -66,14 +72,16 @@ n-grid   & 6.716 & 86.304 & 1917.237 & 25193.771 \\
 SVD      & 0.016 &  0.226 &    5.093 &   106.752 \\
 \hline
 
-\end{tabular}
-\caption{Время препроцессирования в секундах}
-\label{preproc_time}
+\end{tabular*}}
 \end{table}
 
 \begin{table}[ht]
 \centering
-\begin{tabular}{|r|r|r|r|r|}
+\renewcommand{\arraystretch}{1.1}
+\captionbox{Количество памяти, занимаемой структурой, в мегабайтах
+\label{mem_usage}
+}{
+\begin{tabular*}{1.0\textwidth}{@{\extracolsep{\fill}} |l|r|r|r|r|}
 
 \hline
 Алгоритм/количество отрезков & 100 & 1000 & 10000 & 100000 \\
@@ -82,14 +90,17 @@ quadtree & 1.154 & 2.988 & 19.386 & 184.775 \\
 n-grid   & 1.150 & 2.061 &  9.267 &  65.876 \\
 SVD      & 0.223 & 1.065 &  5.982 &  53.277 \\
 \hline
-\end{tabular}
-\caption{Количество памяти, занимаемой структурой, в мегабайтах}
-\label{mem_usage}
+\end{tabular*}}
 \end{table}
 
 \begin{table}[ht]
 \centering
-\begin{tabular}{|r|r|r|r|r|}
+\renewcommand{\arraystretch}{1.1}
+\captionbox{
+Максимальное количество памяти, потребляемое при построении в мегабайтах
+\label{max_mem_usage}
+}{
+\begin{tabular*}{1.0\textwidth}{@{\extracolsep{\fill}} |l|r|r|r|r|}
 
 \hline
 Алгоритм/количество отрезков & 100 & 1000 & 10000 & 100000 \\
@@ -99,9 +110,7 @@ n-grid   & 1.659 & 7.387 & 174.917 & 2716.963 \\
 SVD      & 0.223 & 1.065 &   5.982 &   53.277 \\
 \hline
 
-\end{tabular}
-\caption{Максимальное количество памяти, потребляемое при построении в мегабайтах}
-\label{max_mem_usage}
+\end{tabular*}}
 \end{table}
 
 \FloatBarrier
@@ -118,7 +127,9 @@ SVD      & 0.223 & 1.065 &   5.982 &   53.277 \\
 
 \begin{table}[ht]
 \centering
-\begin{tabular}{|r|r|r|r|r|}
+\renewcommand{\arraystretch}{1.1}
+\captionbox{Характеристики квадродеревьев\label{qt_char}}{
+\begin{tabular*}{1.0\textwidth}{@{\extracolsep{\fill}} |l|r|r|r|r|}
 
 \hline
 Характеристика/количество отрезков & 100 & 1000 & 10000 & 100000 \\
@@ -128,9 +139,7 @@ SVD      & 0.223 & 1.065 &   5.982 &   53.277 \\
 Максимальная глубина            &  4    &   7.25 &    11    &     12 \\
 \hline
 
-\end{tabular}
-\caption{Характеристики квадродеревьев}
-\label{qt_char}
+\end{tabular*}}
 \end{table}
 
 \FloatBarrier
