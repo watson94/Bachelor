@@ -2,55 +2,213 @@
 \chapter{Решение задачи поиска кратчайшего расстояния от фиксированной вершины до всех остальных}
 \label{chapSVD}
 
-В данной главе бла-бла-бла.
+В данной главе описаны алгоритмы по решению классической задаче на графах - поиску кратчайших расстояний от одной вершины до всех остальных. В первой части главы представлен краткий обзор предметной области. Во второй параллельные модификации алгоритма Беллмана-Форда. 
 
 \FloatBarrier
 \section{Обзор существующих решений}
-
-Введение в существующие решения
-
-\FloatBarrier
 \subsection{Алгоритм Дейкстры}
 
-бла-бла-бла
+Одним из наиболее заметных алгоритмов для решения данной задачи является алгоритм Дейкстры. Придуманный еще в 1959 году Эдсгером Вибе Дейкстрой он сохраняет свою актуальность и по сей день. Основная идея состоит в последовательном пополнении множества вершин, расстояние для которых уже корректно посчитано. При этом на каждом шаге выбирается вершина, которая находится ближе остальных к уже посчитанному множеству. 
+
+Существует множество модификации алгоритма основанных на различных структурах данных для выбора вершины с минимальный расстоянием на каждом из шагов алгоритма. В зависимости от этого алгоритм может работать O(V*V+E), O(ElogV) или O(VlogV+E). 
+
+Основная проблема алгоритма состоит в том, что он работает только на графах с неотрицательным весом ребер. С этой проблемой справляется алгоритм Беллмана-Форда. 
 
 
 \FloatBarrier
 \subsection{Алгоритм Беллмана-Форда}
 
-бла-бла-бла
+Классический алгоритм Беллмана-Форда работает на графах с произвольным весом ребер, однако имеет заметно худшую асимптотику по сравнению с алгоритмом Дейсктры - O(VE). 
+
+Основная идея алгоритма основана на идее динамического программирования. После k итерации алгоритма утверждается, что будут корректно посчитаны и обработаны значения веса путей длиной не более K. И после V итерации расстояние до каждой из вершин посчитано корректно. Ниже приведен каноничный псевдокод алгоритма. 
+
+\FloatBarrier
+\begin{algorithm}
+\caption{Классический алгоритм Беллмана-Форда}\label{bf_classic_seq}
+\begin{algorithmic}[1]
+\Procedure{ClassicBellmanFord}{$G,start$}
+\State $dist\gets \left\{ {\infty ... \infty}\right\}$
+\State $dist[start] \gets 0$
+ 
+\For{$i = 0$ to $|G.vertices| $}
+	\For{$e \in G.edges $}
+		\State $dist[e.to] \gets \max(dist[e.to], dist[e.from] + e.w)$
+	\EndFor
+\EndFor
+\State \textbf{return} $dist$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\FloatBarrier
+Кроме того существует интересная модификация алгоритма, которая поддерживает на каждой итерации набор вершин, расстояние до которых изменились на предыдущем шаге алгоритма. Из очевидных соображений мы имеем право рассматривать только эти и никакие другие вершины. Этот алгоритм на практике зачастую работает заметно быстрее чем классическая версия в некоторых случаях, но об этом подробно будет описано позднее. Будем называть эту версию BFS-подобный Беллман-Форд. Ниже приведен псевдокод алгоритма 
+
+\FloatBarrier
+\begin{algorithm}
+\caption{BFS-подобный Беллман-Форд}\label{bf_classic_seq}
+\begin{algorithmic}[1]
+\Procedure{BFSBellmanFord}{$G,start$}
+\State $dist\gets \left\{ {\infty ... \infty}\right\}$
+\State $dist[start] \gets 0$
+\State $VertexSet \gets \left\{ {start}\right\}$\Comment{структура данных для хранения набора вершин} 
+\State $NextVertexSet \gets \emptyset$ 
+\State {$step \gets 0$ }
+\While {$step < |G.vertices|$ \algorithmicand \algorithmicnot $ VertexSet.empty()$}
+	\State $step++$
+	\State $NextVertexSet.clear()$
+	
+	\For{$v \in VertexSet$}
+		\For{$e \in G.edgesFrom[v] $} \Comment{исходящие ребра из текущей вершины} 
+			\If {$dist[e.to] < dist[e.from] + e.w$} 
+				\State $dist[e.to] \gets dist[e.from] + e.w$
+				\State $NextVertexSet.insert(e.to)$								
+			\EndIf
+		\EndFor
+	\EndFor
+	
+	\State $VertexSet \gets NextVertexSet$	
+\EndWhile
+
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
 
 \FloatBarrier
 \subsection{Другие алгоритмы}
 
-бла-бла-бла
-
+Также известны специализированные алгоритмы, такие как алгоритм A* и D*, которые оперирует большими специализированными графами и используют ряд эвристик для поиска расстояний. При этом в контексте наших исследований они затронуты не будут.
 
 \FloatBarrier
 \section{Параллельный алгоритм Беллмана-Форда}
 
-Введение в алгоритмы
+В предыдущей главе были рассмотрены классические алгоритмы поиска кратчайших путей в графе. В этой главе будет рассмотрен алгоритм Беллмана-Форда в контексте параллельных вычислений. Кроме того будем использовать в каждом из алгоритмов идею ранней остановки - если на текущем шаге ни одно из значений массива расстояний не изменилось, то имеем право выйти из основного цикла. В последующих главах будет представлено несколько версий алгоритма, а также их последующее сравнение и рекомендации по использованию.  
 
 \FloatBarrier
 \subsection{Параллелизация по ребрам вершины}
-бла-бла-бла
+Первая версия алгоритма основана на параллельной обработке всех ребер, исходящих из текущей вершины. Псевдокод, который практически не отличается от классической версии, приведен ниже. 
+
+
+\FloatBarrier
+\begin{algorithm}
+\caption{Параллельный Беллман-Форд по ребрам вершины}\label{bf_classic_par1}
+\begin{algorithmic}[1]
+\Procedure{BellmanFordPar1}{$G,start$}
+\State $dist\gets \left\{ {\infty ... \infty}\right\}$
+\State $dist[start] \gets 0$
+ 
+\For{$i = 0$ to $|G.vertices| $}
+	\State {$changed \gets $ \algorithmicfalse}
+	\For{$v \in G.vertices $}
+		\algrenewcommand\algorithmicfor{\textbf{parfor}}
+		\For{$e \in G.fromEdges[v] $} 
+			\If {$dist[e.to] < dist[e.from] + e.w$} 
+				\State $dist[e.to] \gets dist[e.from] + e.w$
+				\State {$changed \gets $ \algorithmictrue}						
+			\EndIf
+			\State $dist[e.to] \gets \max(dist[e.to], dist[e.from] + e.w)$
+		\EndFor	
+		\algrenewcommand\algorithmicfor{\textbf{for}}
+
+	\EndFor
+	\If {\algorithmicnot $changed$} 
+		\State $break$
+	\EndIf
+
+\EndFor
+\State \textbf{return} $dist$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
 
 \FloatBarrier
 \subsection{Параллелизация по всем ребрам}
-бла-бла-бла
+Идея второго алгоритма состоит в разбиений всего набора вершин на некоторые подмножества, каждое из которых будет обрабатываться отдельным процессором. При этом для каждой вершины будем рассматривать набор ребер, входящих в нее. Это необходимо для того, чтобы обновление фиксированной ячейки в массиве расстояний происходило только одним потоком. 
 
+\FloatBarrier
+\begin{algorithm}
+\caption{Параллельный Беллман-Форд по всем ребрам}\label{bf_classic_par2}
+\begin{algorithmic}[1]
+\Procedure{BellmanFordPar2}{$G,start$}
+\State $dist\gets \left\{ {\infty ... \infty}\right\}$
+\State $dist[start] \gets 0$
+\State {$prefsum \gets $ prefix sum of vertices incoming degree} 
+\State {$planMap \gets BuildPlan(prefsum, 0, |G.vertices|$ } 
+
+\For{$i = 0$ to $|G.vertices| $}	
+	\If {\algorithmicnot $ProcessLayer(G, planMap, prefsum, 0, |G.vertices|)$} 
+		\State $break$						
+	\EndIf
+		
+		
+\EndFor
+\State \textbf{return} $dist$
+\EndProcedure
+
+\State 
+\Procedure{BuildPlan}{$prefsum, startV, endV$}  \Comment{Функция возвращают структуру, которая по отрезку возвращает его середину по количеству ребер }
+
+\State $edgesNumber \gets prefsum[endV] - prefsum[startV]$
+\If {$edgesNumber < threshold$} 
+	\State $midV \gets $ binary search on edges number
+	\State $resultMap[startV][endV] \gets midV$ 
+	\State $resultMap[startV][endV].insert(BuildPlan(prefsum, startV, midV)$ 
+	\State $resultMap[startV][endV].insert(BuildPlan(prefsum, midV, endV)$ 					
+\EndIf
+
+\State \textbf{return} $resultMap$
+\EndProcedure
+
+\State 
+\Procedure{ProcessLayer}{$G, planMap, prefsum, startV, endV$}  
+\State $edgesNumber \gets prefsum[endV] - prefsum[startV]$
+\If {$edgesNumber < threshold$} 
+	\State process vertices sequentally 	
+\Else	
+	\State $midV \gets planMap[startV][endV]$ 
+	\State $ProcessLayer(G, planMap, prefsum, startV, midV)$
+	\State $ProcessLayer(G, planMap, prefsum, midV, endV)$	
+\EndIf
+
+\EndProcedure
+
+\end{algorithmic}
+\end{algorithm}
 
 \FloatBarrier
 \subsection{Параллелизация BFS - версии}
-бла-бла-бла
+Предыдущие две версии были основаны на параллелизации классической версии Беллмана-Форда. В основе следующего алгоритма лежит идея обхода в ширину (Алгоритм 2). В качестве основы для параллельной версии такого алгоритма был взят параллельный обход в ширину, предложенный Умутом Акаром и Майком Рэйни. Подробнее о внутреннем устройстве их подхода речь зайдет во 2 части работы в контексте решения задачи поиска расстояний между каждой парой вершин. Пока лишь приведем псевдокод 
+
+\FloatBarrier
+\begin{algorithm}
+\caption{Параллельный BFS-подобный Беллман-Форд}\label{bf_bfs_par}
+\begin{algorithmic}[1]
+\Procedure{BellmanFordPar3}{$G,start$}
+\State $dist\gets \left\{ {\infty ... \infty}\right\}$
+\State $dist[start] \gets 0$
+\State $Frontier \gets \left\{ {start}\right\}$\Comment{структура данных для хранения исходящих ребер текущего множества } 
+
+\For{$i = 0$ to $|G.vertices| $}	
+	\State $Frontier \gets handleFrontier(Frontier)$ \Comment{релаксируем ребра из фронтира и строим новый} 
+	
+	\If { $Frontier.empty()$} 
+		\State $break$						
+	\EndIf
+		
+		
+\EndFor
+\State \textbf{return} $dist$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
 
 \FloatBarrier
 \subsection{Сравнение подходов}
-бла-бла-бла
+TODO
 
 \FloatBarrier
 \section{Выводы}
 
-Всякие-разные выводы
+TODO
 
 \FloatBarrier

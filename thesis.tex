@@ -17,12 +17,16 @@
 \usepackage{amssymb}
 \usepackage{amsthm}
 \usepackage{amsfonts}
+\usepackage{xspace}
+\usepackage{algorithm}
+\usepackage{algorithmicx}
 \usepackage{amsxtra} 
 \usepackage{sty/dbl12}
 \usepackage{srcltx}
 \usepackage{epsfig}
 \usepackage{verbatim}
 \usepackage{sty/rac}
+\usepackage{algpseudocode}
 %\usepackage[russian]{sty/ralg}
 \usepackage{listings}
 \usepackage{placeins}
@@ -30,6 +34,9 @@
 %\usepackage{floatrow}
 \usepackage{caption}
 \captionsetup[table]{position=t,justification=raggedright,slc=off}
+\makeatletter
+\def\BState{\State\hskip-\ALG@thistlm}
+\makeatother
 
 %\usepackage[
 %    top    = 2.00cm,
@@ -64,8 +71,20 @@
 \newtheorem{notation}[theorem]{Обозначение}
 \newtheorem{condition}[theorem]{Условие}
 \newtheorem{example}[theorem]{Пример}
-\newtheorem{algorithm}[theorem]{Алгоритм}
+\newtheorem{algo}[theorem]{Алгоритм}
 %\newtheorem{introduction}[theorem]{Introduction}
+
+\floatname{algorithm}{Алгоритм}
+
+\algnewcommand\algorithmicand{\textbf{and}\xspace}
+\algnewcommand\algorithmicor{\textbf{or}\xspace}
+\algnewcommand\algorithmicnot{\textbf{not}\xspace}
+\algnewcommand\algorithmictrue{\textbf{true}}
+\algnewcommand\algorithmicfalse{\textbf{false}}
+\algtext*{EndWhile} % Remove "end while" text
+\algtext*{EndIf} % Remove "end if" text
+\algtext*{EndFor} % Remove "end for" text
+\algtext*{EndProcedure} % Remove "end for" text
 
 \renewcommand{\proof}{\\\textbf{Доказательство.}~}
 
