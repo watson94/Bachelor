@@ -198,13 +198,71 @@
 \EndFor
 \State \textbf{return} $dist$
 \EndProcedure
+\State
+\Procedure{HandleFrontier}{$Frontier$}
+\State recursively divide current frontier, atomically relax edges in frontier and building a new one
+
+\State \textbf{return} $NewFrontier$
+\EndProcedure
+
 \end{algorithmic}
 \end{algorithm}
 
 
 \FloatBarrier
 \subsection{Сравнение подходов}
-TODO
+Каждый из вышеизложенных подходов имеет свои особенности, что позволяет каждому из них конкурировать друг с другом на некоторых типах графов. Рассмотрим эти особенности.
+
+С первого взгляда может показаться, что Алгоритм 3 имеет лишь одни недостатки - он имеет наименьшим образом по сравнению с последующими задействует все процессоры и при этом асимптотически равен остальным двум. Однако рассмотрим внимательнее каноничный аглоритм Беллмана-Форда и запустим его на плотном графе, где для каждого ребра верно, что индекс вершины источника меньше индекса вершины назначения. В этом случае каноничной версии достаточно будет сделать лишь две итерации внешнего цикла, поскольку на каждой итераций внутреннего цикла значение расстояния для текущей вершины будет корректно посчитано (очевидно доказывается по математической индукции). Так как количество итерации третьего алгоритма в подобных графах может быть значительным и размер текущей очереди может быть большим, а второму же алгоритму на таких графах неплохая способность параллелиться будет только вредить - она будет заметно увеличивать число итераций внешнего цикла. То есть в таких случаях последние два алгоритма работают хуже первого.   
+
+Но очевидно, что в большинстве случаев последние два алгоритма будут показывать лучшие результаты. Сравним эти два подхода. Алгоритм, основанный на обходе в ширину, заметно сокращает количество вершин для обработки в пределах каждой итерации. Однако на плотных графах количество таких вершин значительно и такой подход показывает себя не с лучшей стороны. 
+
+\FloatBarrier
+\subsection{Тестирование}
+
+Для подтверждения вышеприведенных замечаний все вышеизложенные подходы были реализованы на основе библиотеки для параллельных вычислений PASL. Тестирование производилось на ряде графов на машине 40-core Intel machine (with hyper-threading) with 4×2.4GHz Intel
+10-core E7-8870 Xeon processors, a 1066MHz bus, and 256GB of
+main memory. 
+
+ИСПРАВИТЬ ДАННЫЕ В ТАБЛИЦАХ (раскидать RandomDense и RandomSparse)
+\begin{table}
+\centering
+
+\begin{tabular}{l|ccc|cc|cc|ccc|ccc}  
+Algo №& \multicolumn{3}{c}{Complete} & \multicolumn{2}{c}{BalancedTree} & \multicolumn{2}{c}{SquareGrid} & \multicolumn{3}{c}{RandomSparse} & \multicolumn{3}{c}{RandomDense}\\
+& TS & + & - & 0.5 & 1 & + & +- & 0.5+ & 0.5K+ & 0.5- & 0.5- & 0.96+ & 0.96+\\
+\hline\hline
+3 & 2.43 & 4.65 & nc & 116.31 & 9.04 & 5.49 & 13.40 & nc & nc & nc & nc & 24.35 & 5.01 \\  
+4 & 5.17 & 0.18 & 10.84 & 3.59 & 3.08 & 5.92 & 7.10 & 2.77 & 0.48 & 14.68 & 6.38 & 2.42 & 0.46 \\
+5 & 44.63 & 0.37 & 23.55 & 0.44 & 0.31 & 4.42 & 0.58 & 0.98 & 0.60 & 22.59 & 10.25 & 0.76 & 0.71 \\
+\hline
+\end{tabular}
+
+\caption{Bellman-Ford algorithms comparison}
+\label{graph_description}
+\end{table}
+
+\begin{table}
+\centering
+
+\begin{tabular}{c|c|c|c}  
+Name & Vertices & Edges & Description\\
+\hline\hline
+Complete TS & 1 & 1 & 1 \\  
+Complete sign & 1 & 1 & 1 \\  
+BalancedTree fraction & 1 & 1 & 1 \\  
+SquareGrid sign & 1 & 1 & 1 \\  
+RandomSparse fraction sign & 1 & 1 & 1 \\  
+RandomDense fraction sign & 1 & 1 & 1 \\  
+
+\hline
+\end{tabular}
+
+\caption{Input graph description}
+\label{bf_algo_comparison}
+\end{table}
+
+
 
 \FloatBarrier
 \section{Выводы}
