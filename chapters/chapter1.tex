@@ -224,17 +224,44 @@
 10-core E7-8870 Xeon processors, a 1066MHz bus, and 256GB of
 main memory. 
 
-ИСПРАВИТЬ ДАННЫЕ В ТАБЛИЦАХ (раскидать RandomDense и RandomSparse)
+Алгоритмы тестировались на различных графовых структурах, которые перечислены в Таблице 1.1. При этом описание для формата приведено внизу таблицы.
+\begin{table}
+\centering
+
+\begin{tabular}{c|c|c}  
+Name & Vertices & Edges\\
+\hline\hline
+Complete TS & 7071 & 24995985 \\  
+Complete sign & 3162 & 9995082  \\  
+BalancedTree fraction & 8388607 & 8388608 \\  
+SquareGrid sign & 2499561 & 4999122  \\  
+RandomSparse fraction(0.5) sign & 2500000 & 25000000  \\  
+RandomSparse fraction(0.96) sign(+) & 2500000 & 25000000  \\  
+RandomDense fraction(0.5) sign & 5000 & 25000000  \\  
+RandomDense fraction(0.96) sign(+) & 5000 & 25000000  \\  
+\hline
+\multicolumn{3}{l}{\footnotesize \textit{sign} - sign of weights on edges }\\
+\multicolumn{3}{l}{\footnotesize \textit{fraction} - fraction of lexicographically sorted edges (edges of type X -> X+i) }\\
+\multicolumn{3}{l}{\footnotesize \textit{TS} - exists only Lexicographically Sorted edges (fraction = 1) }\\
+\multicolumn{3}{l}{\footnotesize }\\
+\multicolumn{3}{l}{\footnotesize  expression \textit{RandomDense fraction(0.5) sign} means Random Dense }\\
+\multicolumn{3}{l}{\footnotesize 	graph with specified fraction and any sign of weights}\\
+\end{tabular}
+
+\caption{Input graph description}
+\label{bf_algo_comparison}
+\end{table}
+
 \begin{table}
 \centering
 
 \begin{tabular}{l|ccc|cc|cc|ccc|ccc}  
 Algo №& \multicolumn{3}{c}{Complete} & \multicolumn{2}{c}{BalancedTree} & \multicolumn{2}{c}{SquareGrid} & \multicolumn{3}{c}{RandomSparse} & \multicolumn{3}{c}{RandomDense}\\
-& TS & + & - & 0.5 & 1 & + & +- & 0.5+ & 0.5K+ & 0.5- & 0.5- & 0.96+ & 0.96+\\
+& TS & + & - & 0.5 & 1 & + & +- & 0.5+  & 0.5- & 0.96+ & 0.5+ & 0.5- & 0.96+\\
 \hline\hline
-3 & 2.43 & 4.65 & nc & 116.31 & 9.04 & 5.49 & 13.40 & nc & nc & nc & nc & 24.35 & 5.01 \\  
-4 & 5.17 & 0.18 & 10.84 & 3.59 & 3.08 & 5.92 & 7.10 & 2.77 & 0.48 & 14.68 & 6.38 & 2.42 & 0.46 \\
-5 & 44.63 & 0.37 & 23.55 & 0.44 & 0.31 & 4.42 & 0.58 & 0.98 & 0.60 & 22.59 & 10.25 & 0.76 & 0.71 \\
+3 & 2.43 & 4.65 & nc & 116.31 & 9.04 & 5.49 & 13.40 & nc & nc & 24.35 & nc & nc & 5.01 \\  
+4 & 5.17 & 0.18 & 10.84 & 3.59 & 3.08 & 5.92 & 7.10 & 2.77 & 14.68 & 2.42 & 0.48  & 6.38  & 0.46 \\
+5 & 44.63 & 0.37 & 23.55 & 0.44 & 0.31 & 4.42 & 0.58 & 0.98 & 22.59 & 0.76  & 0.60  & 10.25 & 0.71 \\
 \hline
 \end{tabular}
 
@@ -242,31 +269,10 @@ Algo №& \multicolumn{3}{c}{Complete} & \multicolumn{2}{c}{BalancedTree} & \mul
 \label{graph_description}
 \end{table}
 
-\begin{table}
-\centering
-
-\begin{tabular}{c|c|c|c}  
-Name & Vertices & Edges & Description\\
-\hline\hline
-Complete TS & 1 & 1 & 1 \\  
-Complete sign & 1 & 1 & 1 \\  
-BalancedTree fraction & 1 & 1 & 1 \\  
-SquareGrid sign & 1 & 1 & 1 \\  
-RandomSparse fraction sign & 1 & 1 & 1 \\  
-RandomDense fraction sign & 1 & 1 & 1 \\  
-
-\hline
-\end{tabular}
-
-\caption{Input graph description}
-\label{bf_algo_comparison}
-\end{table}
-
-
-
 \FloatBarrier
 \section{Выводы}
 
-TODO
+Из таблиц видно, что наши ожидания относительно применимости конкретных подходов оправдались. Первый из алгоритмов работает лучше на узком спектре графов с высоким fraction и высокой средней степенью вершины, второй хорошо работает на плотных графах и графах с отрицательным весом ребер, третий же заметно лучше остальных на разреженных графах.
 
+Таким образом сделав простой анализ структуры графа 
 \FloatBarrier
