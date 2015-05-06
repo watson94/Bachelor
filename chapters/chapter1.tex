@@ -32,7 +32,7 @@
  
 \For{$i = 0$ to $|G.vertices| $}
 	\For{$e \in G.edges $}
-		\State $dist[e.to] \gets \max(dist[e.to], dist[e.from] + e.w)$
+		\State $dist[e.to] \gets \min(dist[e.to], dist[e.from] + e.w)$
 	\EndFor
 \EndFor
 \State \textbf{return} $dist$
@@ -105,7 +105,7 @@
 				\State $dist[e.to] \gets dist[e.from] + e.w$
 				\State {$changed \gets $ \algorithmictrue}						
 			\EndIf
-			\State $dist[e.to] \gets \max(dist[e.to], dist[e.from] + e.w)$
+			\State $dist[e.to] \gets \min(dist[e.to], dist[e.from] + e.w)$
 		\EndFor	
 		\algrenewcommand\algorithmicfor{\textbf{for}}
 
@@ -274,5 +274,5 @@ Algo №& \multicolumn{3}{c}{Complete} & \multicolumn{2}{c}{BalancedTree} & \mul
 
 Из таблиц видно, что наши ожидания относительно применимости конкретных подходов оправдались. Первый из алгоритмов работает лучше на узком спектре графов с высоким fraction и высокой средней степенью вершины, второй хорошо работает на плотных графах и графах с отрицательным весом ребер, третий же заметно лучше остальных на разреженных графах.
 
-Таким образом сделав простой анализ структуры графа 
+Таким образом сделав простой анализ структуры графа мы сможем выбрать необходимый алгоритм для поиска кратчайшего пути. 
 \FloatBarrier
