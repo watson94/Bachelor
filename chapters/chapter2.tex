@@ -91,21 +91,45 @@
 \subsection{Работа алгоритма}
 Как уже было отмечено ранее, работа алгоритма разбивается на три этапа - анализ графа и выбор базовой вершины, обработка меньшего множества и обработка большего. Разберемся с каждым этапом по отдельности.
 
-Первый и самый простой этап состоит в выборе базовой вершины. В качестве нее будет выбрана вершина с наибольшей степенью. После этого из этой вершины будет запущен обход в ширину, который найдет все вершины, отстоящие не более, чем на K (в описанном в предыдущем пункте случае K = 6). Таким образом, все такие вершины попадают в множество, которое будет обработано на третьем этапе алгоритма. Все остальные вершины попадают в второе множество.
+Первый и самый простой этап состоит в выборе базовой вершины. В качестве нее будет выбрана вершина с наибольшей степенью. После этого из этой вершины будет запущен обход в ширину, который найдет все вершины, отстоящие не более, чем на K (в описанном в предыдущем пункте случае K = 6). Таким образом, все такие вершины попадают в множество, которое будет обработано на третьем этапе алгоритма. Все остальные вершины попадают в второе множество. Псевдокод этого этапа выглядит следующим образом
+
+\FloatBarrier
+\begin{algorithm}
+\caption{Первая фаза алгоритма}\label{all_pairs_social1}
+\begin{algorithmic}[1]
+\Procedure{ConstructSets}{$G$}
+\State {$baseVertex \gets $ vertex with max degree}
+\State {$dist \gets $ run serial bfs from $baseVertex$}
+\State $handleByBaseVertexSet \gets \emptyset$
+\algrenewcommand\algorithmicfor{\textbf{parfor}} 
+\For{$i = 0$ to $|G.vertices| - 1$}
+\algrenewcommand\algorithmicfor{\textbf{for}}
+	\If {$dist[i] \leq K$ }
+		\State $handleByBaseVertexSet.add(i)$
+	\EndIf
+\EndFor
+
+\State $otherVertexSet \gets G.vertices \setminus handleByBaseVertexSet$ 
+\State \textbf{return} $ baseVertex, handleByBaseVertexSet, otherVertexSet$
+\EndProcedure
+
+\end{algorithmic}
+\end{algorithm}
 
 
 
-В качестве алгоритма для обработки второго множества запустим параллельный обход в ширину (он же Беллман-Форд) для каждой из вершин этого множества. Кроме того запустим обход для базовой вершины. Эти значения расстоянии нам помогут на третьем этапе алгоритма.
 
-Для поиска искомых значении для вершин третьего множества воспользуемся методом динамического программирования. Но сперва обсудим основные принципы построения алгоритма и доказательство его корректности. 
+В качестве алгоритма для обработки второго множества запустим параллельный обход в ширину (он же Беллман-Форд) для каждой из вершин этого множества. Кроме того запустим обход для базовой вершины. Эти значения расстоянии нам помогут на третьем этапе алгоритма. На этом этапе используется просто Алгоритм 7 для множества otherVertexSet. 
 
-Рассмотрим некоторую вершину, которая находится на расстояний D от базовой вершины (D <= K). То какие вершины для нее могут находится на расстоянии I? Это могут быть только те вершины, которые находятся на расстоянии [I-D, I+D] от базовой. Иначе бы не выполнялось свойство, что путь кратчайший. С другой стороны, если рассмотреть некоторую вершины, расстояние до которой равняется I, то для всех вершин из "большого" множества верно, что кратчайшее расстояние от них до нее варьируется в промежутке [I-K, I+K]. 
+Для поиска искомых значении для вершин множества handleByBaseVertexSet воспользуемся методом динамического программирования. Но сперва обсудим основные принципы построения алгоритма и доказательство его корректности. 
+
+Рассмотрим некоторую вершину, которая находится на расстояний D от базовой вершины (D <= K). То какие вершины для нее могут находится на расстоянии I? Это могут быть только те вершины, которые находятся на расстоянии [I-D, I+D] от базовой. Иначе бы не выполнялось свойство, что путь кратчайший. С другой стороны, если рассмотреть некоторую вершины, расстояние до которой равняется I, то для всех вершин из множества handleByBaseVertexSet верно, что кратчайшее расстояние от них до нее варьируется в промежутке [I-K, I+K]. 
 
  Предположим, что мы запустили обход в ширину из всех вершин большого множества. То какие вершины могут быть в слое с номером I? Ответ вытекает из рассуждений предыдущего абзаца - только вершины, расстояние от которых до базовой варьируется в промежутке [I-K, I+K]. То есть каждая из вершин будет принимать участие в не более, чем 2K+1 слоях. То построим для каждого слоя обхода в ширину множество возможных вершин на этом слое. Это избавит нас от построения следующего фронтира по текущему. И при этом общее количество вершин во всех слоях будет пропорционально числу вершин в графе (если учитывать, что K - небольшое число, меньшее 7). 
  
  После того, как мы построили набор вершин для каждого из слоев мы можем воспользоваться структурой Фронтир для эффективного распараллеливания процесса обработки ребер, исходящих из этих вершин. Но к текущему моменту мы никак не воспользовались тем фактом, что вершины расположены близко друг к другу, и, может быть, существует способ для оптимальной обработки группы вершин. Такой подход существует и основан на идее динамического программирования и применения битовых векторов. 
  
- Будем поддерживать две динамики. Значениями в полях массива будут битовые вектора - это некоторая структура, где каждый из битов соответсвует вершине из "большого" множества. Первая из динамик mask[u][i] - это битовый вектор вершин, расстояние от которых до U равно I. Вторая из динамик calc[u][i] - набор вершин, расстояние от которых до U не более, чем I. 
+ Будем поддерживать две динамики. Значениями в полях массива будут битовые вектора - это некоторая структура, где каждый из битов соответсвует вершине из множества handleByBaseVertexSet. Первая из динамик mask[u][i] - это битовый вектор вершин, расстояние от которых до U равно I. Вторая из динамик calc[u][i] - набор вершин, расстояние от которых до U не более, чем I. 
  
  Рассмотрим процесс пересчета значений динамики. Для подсчета текущего значения mask воспользуемся формулой (2.1). Обратим внимание, что в битовые вектора должны поддерживать битовые логические операции. 
   
@@ -118,6 +142,76 @@ mask[v][i] = (OR (mask[u][i - 1] where \exists edge u->v)) AND (NOT calc[v][i - 
 calc[v][i] = calc[v][i - 1] OR mask[v][i]
 \end{equation}
 
+Псевдокод пересчета значений динамики представлен ниже. 
+
+\FloatBarrier
+\begin{algorithm}
+\caption{Пересчет динамики}\label{all_pairs_social2}
+\begin{algorithmic}[1]
+\State $ K \gets 6$
+\State
+
+\Procedure{CalculateDistancesForBigSet}{$G, baseVertex, handleByBaseVertexSet$}
+\State {$maxLayer \gets $ calculate max distance from baseVertex}
+\State {$Frontier[maxLayer + K] \gets \left\{ {Frontier() ... Frontier()}\right\} $} \Comment{Фронтир для каждого уровня обхода в ширину. Изначально пустой} 
+\State {$VertexSet[maxLayer + K] \gets \left\{ {VertexSet() ... VertexSet()}\right\} $} \Comment{Набор вершин для каждого уровня} 
+
+\For{$i = 0$ to $|G.vertices| $}
+	\For{$j = dist[baseVertex][i] - K$ to $dist[baseVertex][i] + K$}		
+		\State $Frontier[j].pushEdgesOf(i)$
+		\State $VertexSet[j].addVertex(i)$
+	\EndFor
+\EndFor
+
+\For{$i = 0$ to $maxLayer + K$}	
+	\For{$j = dist[baseVertex][i] - K$ to $dist[baseVertex][i] + K$}		
+		\State $Frontier[j].pushEdgesOf(i)$
+	\EndFor
+\EndFor
+\State
+\State $mask\gets \left\{ {   \left\{ {bitVector(0) ... bitVector(0)}\right\}  ... \left\{ {bitVector(0) ... bitVector(0)}\right\} }\right\}$ \Comment{Обратим внимание, что для каждой вершины нам нужно хранить всего 2 * K + 1 битовых векторов. Однако для упрощения понимания псевдокода будем обращаться к I слою вершины U просто как mask[u][i]} 
+\State $calc\gets \left\{ {   \left\{ {bitVector(0) ... bitVector(0)}\right\}  ... \left\{ {bitVector(0) ... bitVector(0)}\right\} }\right\}$
+
+\For{$v \in handleByBaseVertexSet $}
+	\State $mask[v][0] \gets bitVector(id(v))$ \Comment{Будем считать, что существует функция id, которая по номеру вершины возвращает соответсвующий ей бит} 
+
+\EndFor 
+\State
+\For{$layerToCalc = 1$ to $maxLayer + K$}
+	\State $frontierLayer \gets layerToCalc - 1$ \Comment{Для пересчета значений I слоя нам необходимо использовать вершины с предыдущего слоя} 
+	\State $ProcessLayerLazy(G, Frontier[frontierLayer], mask, layerToCalc)$ 
+
+	\algrenewcommand\algorithmicfor{\textbf{parfor}}
+	\For{$v \in VertexSet[layerToCalc] $}
+		\State $calc[v][layerToCalc] \gets mask[v][layerToCalc])$ 
+		\If {not first layer for vertex $v$}
+			\State $calc[v][layerToCalc - 1] \gets \lnot calc[v][layerToCalc - 1]$ 
+			\State $mask[v][layerToCalc] \gets mask[v][layerToCalc] \land calc[v][layerToCalc - 1]$ 
+			\State $calc[v][layerToCalc - 1] \gets \lnot calc[v][layerToCalc - 1]$ 
+			\State $calc[v][layerToCalc] \gets calc[v][layerToCalc] \lor calc[v][layerToCalc - 1]$ 
+		\EndIf
+	\EndFor 
+	\algrenewcommand\algorithmicfor{\textbf{for}}	
+\EndFor 
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\FloatBarrier
+
+Псевдокод обработки текущего Фронтира представлен ниже. 
+\begin{algorithm}
+\caption{Обработка Фронтира}\label{all_pairs_social3}
+\begin{algorithmic}[1]
+\State $ K \gets 6$
+\State
+\Procedure{ProcessLayerLazy}{$G, Frontier, mask, layer$}
+\State blablalba
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+
+\FloatBarrier
 Наконец, как по имеющимся данным динамики восстановить ответ? Для каждого значения mask[u][i] найдем единичные биты в маске. Установленный в единицу бит J говорит о том, что расстояние от вершины из "большого" множества с идентификатором J до вершины u равно i. Таким образом, мы сможем полностью восстановить ответ для каждой вершины. 
 
 
@@ -132,32 +226,20 @@ calc[v][i] = calc[v][i - 1] OR mask[v][i]
 
 \Procedure{AllPairsSocialPar}{$G$}
 \State $dist\gets \left\{ {   \left\{ {\infty ... \infty}\right\}  ... \left\{ {\infty ... \infty}\right\} }\right\}$
-\State {$ handleByBaseVertexSet, otherVertexSet \gets ConstructSets(G)$}
+\State {$ baseVertex, handleByBaseVertexSet, otherVertexSet \gets ConstructSets(G)$}
 \State {$ AllPairsPar1(G, otherVertexSet, dist)$}
-\State {$ CalculateDistancesForBigSet(G, otherVertexSet, dist)$}
+\State {$ CalculateDistancesForBigSet(G, baseVertex, otherVertexSet, dist)$}
 
+
+\State Заполнение массива расстояний
+\algrenewcommand\algorithmicfor{\textbf{parfor}}
+\For{$v = 0$ to $|G.vertices|$}
+\algrenewcommand\algorithmicfor{\textbf{for}}
+	\For{$j = dist[baseVertex][i] - K$ to $dist[baseVertex][i] + K$}		
+		\State $Frontier[j].pushEdgesOf(i)$
+	\EndFor
+\EndFor 
 \State \textbf{return} $dist$ 
-\EndProcedure
-\State
-
-\Procedure{ConstructSets}{$G$}
-\State {$baseVertex \gets $ vertex with max degree}
-\State {run serial bfs from $baseVertex$}
-\State {$handleByBaseVertexSet \gets $ vertices with dist <= K}
-\State $otherVertexSet \gets G.V \setminus handleByBaseVertexSet$ 
-\State \textbf{return} $ handleByBaseVertexSet, otherVertexSet$
-\EndProcedure
-\State
-
-
-\Procedure{CalculateDistancesForBigSet}{$G, vertexSet, dist$}
-
-\If {$smth$} 
-	\State smth
-\Else	
-	\State smth
-\EndIf
-
 \EndProcedure
 
 \end{algorithmic}
