@@ -202,11 +202,37 @@ calc[v][i] = calc[v][i - 1] OR mask[v][i]
 \begin{algorithm}
 \caption{Обработка Фронтира}\label{all_pairs_social3}
 \begin{algorithmic}[1]
-\State $ K \gets 6$
-\State
-\Procedure{ProcessLayerLazy}{$G, Frontier, mask, layer$}
-\State blablalba
+
+\Procedure{ProcessLayerLazy}{$G, Frontier, mask, layer, dists, baseVertex$}
+\While {\algorithmicnot $Frontier.empty()$}
+	\If {$hasIncomingQuery()$}
+		\If {$Frontier.nbEdges() \leq cutoff1$}
+			\State $rejectQuery()$			
+		\Else		
+			\State $NewFrontier \gets \emptyset$
+			\State $Frontier.split(NewFrontier)$
+			\State \begin{varwidth}[t]{\linewidth}fork2(\par
+        \hskip\algorithmicindent ProcessLayerLazy(G, Frontier, mask, layer, dists, baseVertex),\par
+        \hskip\algorithmicindent ProcessLayerLazy(G, NewFrontier, mask, layer, dists, baseVertex));
+      \end{varwidth}
+		\EndIf
+		
+	\EndIf
+	\State Frontier.iterNumber(cutoff2, updateFunction(mask, from, to, layer, dists, baseVertex))
+\EndWhile
 \EndProcedure
+\State
+\Procedure{UpdateFunction}{$mask, from, to, layer, dists, baseV$}
+\If {HaveOnLayer(layer - 1, from, dists, baseV) \algorithmicand HaveOnLayer(layer, to, dists, baseV)} 
+	
+	\State $mask[to][layer] \gets mask[to][layer] \lor mask[from][layer - 1]$ \Comment Атомарно
+\EndIf
+\EndProcedure
+\State
+\Procedure{HaveOnLayer}{$layer, vertex, dists, baseV$}
+\State \textbf{return} {$|dists[baseV][vertex] - layer| \leq K$}  
+\EndProcedure
+
 \end{algorithmic}
 \end{algorithm}
 
@@ -221,8 +247,6 @@ calc[v][i] = calc[v][i - 1] OR mask[v][i]
 \begin{algorithm}
 \caption{Параллельная версия для социальных графов}\label{all_pairs_social}
 \begin{algorithmic}[1]
-\State $ K \gets 6$
-\State
 
 \Procedure{AllPairsSocialPar}{$G$}
 \State $dist\gets \left\{ {   \left\{ {\infty ... \infty}\right\}  ... \left\{ {\infty ... \infty}\right\} }\right\}$
@@ -230,13 +254,18 @@ calc[v][i] = calc[v][i - 1] OR mask[v][i]
 \State {$ AllPairsPar1(G, otherVertexSet, dist)$}
 \State {$ CalculateDistancesForBigSet(G, baseVertex, otherVertexSet, dist)$}
 
-
-\State Заполнение массива расстояний
+\State
 \algrenewcommand\algorithmicfor{\textbf{parfor}}
 \For{$v = 0$ to $|G.vertices|$}
 \algrenewcommand\algorithmicfor{\textbf{for}}
-	\For{$j = dist[baseVertex][i] - K$ to $dist[baseVertex][i] + K$}		
-		\State $Frontier[j].pushEdgesOf(i)$
+	\For{$j = dist[baseVertex][i] - K$ to $dist[baseVertex][i] + K$}	
+		\algrenewcommand\algorithmicfor{\textbf{parfor}}	
+		\For{$u \in handleByBaseVertexSet$}
+			\If {$mask[v][j].getBit(id(u)) = 1$}
+				\State $dist[u][v] = j$		
+			\EndIf	
+		\EndFor
+		\algrenewcommand\algorithmicfor{\textbf{for}}
 	\EndFor
 \EndFor 
 \State \textbf{return} $dist$ 
@@ -248,10 +277,41 @@ calc[v][i] = calc[v][i - 1] OR mask[v][i]
 
 \FloatBarrier
 \subsection{Сравнение с наивными версиями}
-бла-бла-бла.
+
+Обратим внимание, что асимптотически этот подход не отличается от предыдущих. Однако у него есть ряд преимуществ. 
+
+\begin{itemize}
+  \item Пересчет расстояний для группы вершин выполняется быстрее за счет битовых операций. Хоть это и не сказывается на асимптотику, но на практике дает заметный выигрыш. 
+  \item Так как каждый из фронтиров уже построен, то нам не приходится строить следующий фронтир по предыдущему в процессе обработки
+  \item Каждый из получившихся фронтиров довольно большой, что увеличивает его способность к параллелизации
+  \item Все остальные этапы также хорошо параллелятся
+\end{itemize}
+
+Таким образом мы имеем полные основания предполагать, что этот алгоритм на практике покажет заметно лучшие результаты по сравнению с предыдущими версиями. 
+
+Для подтверждения этих гипотез все алгоритмы были реализованы и протестированы на той же машине, о которой шла речь в предыдущей главе в контексте Беллмана-Форда.
+
+В качестве графа для тестирования был взят подграф твиттера из 81306 вершинами и 4841532 ребрами. При этом для каждого из ребер считалось неориентированным. Для сравнения алгоритм были взяты два алгоритма - наивная версия и последний описанный алгоритм. Результаты запуска приведен в таблице 2.1.   
+\FloatBarrier
+\begin{table}
+\centering
+
+\begin{tabular}{l|c}  
+Алгоритм & Twitter graph\\
+\hline\hline
+Наивная параллельная версия & 427.217 \\  
+Алгоритм для социальных графов & 210.322  \\
+\hline
+\end{tabular}
+
+\caption{Сравнение алгоритмов}
+\label{graph_description}
+\end{table}
+\FloatBarrier
+
+Как мы видим мы получили прирост производительности более, чем в два раза.
 
 \FloatBarrier
 \section{Выводы}
-Всякие разные выводы бла-бла-бла.
-
+Таким образом в этой части мы описали алгоритм для поиска кратчайшего расстояния на разреженных графах в общем случае (наивная версия) и для частного случая для социальных графов. 
 \FloatBarrier
