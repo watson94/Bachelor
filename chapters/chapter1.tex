@@ -10,7 +10,7 @@
 
 Одним из наиболее заметных алгоритмов для решения данной задачи является алгоритм Дейкстры. Придуманный еще в 1959 году Эдсгером Вибе Дейкстрой он сохраняет свою актуальность и по сей день. Основная идея состоит в последовательном пополнении множества вершин, расстояние для которых уже корректно посчитано. При этом на каждом шаге выбирается вершина, которая находится ближе остальных к уже посчитанному множеству. 
 
-Существует множество модификации алгоритма основанных на различных структурах данных для выбора вершины с минимальный расстоянием на каждом из шагов алгоритма. В зависимости от этого алгоритм может работать O(V*V+E), O(ElogV) или O(VlogV+E). 
+Существует множество модификации алгоритма основанных на различных структурах данных для выбора вершины с минимальный расстоянием на каждом из шагов алгоритма. В зависимости от этого алгоритм может работать $O(V^2+E)$, $O(E \log V)$ или $O(V \log V+E)$. 
 
 Основная проблема алгоритма состоит в том, что он работает только на графах с неотрицательным весом ребер. С этой проблемой справляется алгоритм Беллмана-Форда. 
 
@@ -18,7 +18,7 @@
 \FloatBarrier
 \subsection{Алгоритм Беллмана-Форда}
 
-Классический алгоритм Беллмана-Форда работает на графах с произвольным весом ребер, однако имеет заметно худшую асимптотику по сравнению с алгоритмом Дейсктры - O(VE). 
+Классический алгоритм Беллмана-Форда работает на графах с произвольным весом ребер, однако имеет заметно худшую асимптотику по сравнению с алгоритмом Дейсктры - $O(VE)$. 
 
 Основная идея алгоритма основана на идее динамического программирования. После k итерации алгоритма утверждается, что будут корректно посчитаны и обработаны значения веса путей длиной не более K. И после V итерации расстояние до каждой из вершин посчитано корректно. Ниже приведен каноничный псевдокод алгоритма. 
 
@@ -27,10 +27,10 @@
 \caption{Классический алгоритм Беллмана-Форда}\label{bf_classic_seq}
 \begin{algorithmic}[1]
 \Procedure{ClassicBellmanFord}{$G,start$}
-\State $dist\gets \left\{ {\infty ... \infty}\right\}$
-\State $dist[start] \gets 0$
+\State {$dist \gets \left\{ {\infty ... \infty}\right\}$}
+\State {$dist[start] \gets 0$}
  
-\For{$i = 0$ to $|G.vertices| $}
+\For{$i = 0$ to $|G.vertices| - 1 $}
 	\For{$e \in G.edges $}
 		\State $dist[e.to] \gets \min(dist[e.to], dist[e.from] + e.w)$
 	\EndFor
@@ -45,19 +45,19 @@
 
 \FloatBarrier
 \begin{algorithm}
-\caption{BFS-подобный Беллман-Форд}\label{bf_classic_seq}
+\caption{BFS-подобный Беллман-Форд}\label{bf_bfs_seq}
 \begin{algorithmic}[1]
 \Procedure{BFSBellmanFord}{$G,start$}
 \State $dist\gets \left\{ {\infty ... \infty}\right\}$
 \State $dist[start] \gets 0$
-\State $VertexSet \gets \left\{ {start}\right\}$\Comment{структура данных для хранения набора вершин} 
+\State $CurrentVertexSet \gets \left\{ {start}\right\}$\Comment{структура данных для хранения набора вершин} 
 \State $NextVertexSet \gets \emptyset$ 
 \State {$step \gets 0$ }
-\While {$step < |G.vertices|$ \algorithmicand \algorithmicnot $ VertexSet.empty()$}
-	\State $step++$
+\While {$step < |G.vertices|$ \algorithmicand \algorithmicnot $ CurrentVertexSet.empty()$}
+	\State $step \gets step + 1$
 	\State $NextVertexSet.clear()$
 	
-	\For{$v \in VertexSet$}
+	\For{$v \in CurrentVertexSet$}
 		\For{$e \in G.edgesFrom[v] $} \Comment{исходящие ребра из текущей вершины} 
 			\If {$dist[e.to] < dist[e.from] + e.w$} 
 				\State $dist[e.to] \gets dist[e.from] + e.w$
@@ -66,8 +66,9 @@
 		\EndFor
 	\EndFor
 	
-	\State $VertexSet \gets NextVertexSet$	
+	\State $CurrentVertexSet \gets NextVertexSet$	
 \EndWhile
+\State \textbf{return} $dist$
 
 \EndProcedure
 \end{algorithmic}
@@ -96,7 +97,7 @@
 \State $dist\gets \left\{ {\infty ... \infty}\right\}$
 \State $dist[start] \gets 0$
  
-\For{$i = 0$ to $|G.vertices| $}
+\For{$i = 0$ to $|G.vertices| - 1 $}
 	\State {$changed \gets $ \algorithmicfalse}
 	\For{$v \in G.vertices $}
 		\algrenewcommand\algorithmicfor{\textbf{parfor}}
@@ -105,7 +106,6 @@
 				\State $dist[e.to] \gets dist[e.from] + e.w$
 				\State {$changed \gets $ \algorithmictrue}						
 			\EndIf
-			\State $dist[e.to] \gets \min(dist[e.to], dist[e.from] + e.w)$
 		\EndFor	
 		\algrenewcommand\algorithmicfor{\textbf{for}}
 
@@ -131,28 +131,27 @@
 \Procedure{BellmanFordPar2}{$G,start$}
 \State $dist\gets \left\{ {\infty ... \infty}\right\}$
 \State $dist[start] \gets 0$
-\State {$prefsum \gets $ prefix sum of vertices incoming degree} 
-\State {$planMap \gets BuildPlan(prefsum, 0, |G.vertices|$ } 
+\State {$prefsum \gets $ prefix sum by vertices incoming degree} 
+\State {$planMap \gets $ \Call {BuildPlan}{$prefsum$, 0, |$G.vertices$|}} 
 
 \For{$i = 0$ to $|G.vertices| $}	
-	\If {\algorithmicnot $ProcessLayer(G, planMap, prefsum, 0, |G.vertices|)$} 
-		\State $break$						
+	\If {\algorithmicnot \Call {ProcessLayer}{$G, planMap, prefsum, 0, |G.vertices|$}} 
+		\State \textbf{break}
 	\EndIf
-		
 		
 \EndFor
 \State \textbf{return} $dist$
 \EndProcedure
 
 \State 
-\Procedure{BuildPlan}{$prefsum, startV, endV$}  \Comment{Функция возвращают структуру, которая по отрезку возвращает его середину по количеству ребер }
-
+\Procedure{BuildPlan}{$prefsum, startV, endV$}  \Comment{Функция возвращают структуру, которая по отрезку возвращает его середину}
+\State {$resultMap \gets $ empty map}
 \State $edgesNumber \gets prefsum[endV] - prefsum[startV]$
 \If {$edgesNumber < threshold$} 
-	\State $midV \gets $ binary search on edges number
+	\State $midV \gets $ binary search by edges number
 	\State $resultMap[startV][endV] \gets midV$ 
-	\State $resultMap[startV][endV].insert(BuildPlan(prefsum, startV, midV)$ 
-	\State $resultMap[startV][endV].insert(BuildPlan(prefsum, midV, endV)$ 					
+	\State {$resultMap.addAll($ \Call {BuildPlan}{$prefsum, startV, midV$})} 
+	\State {$resultMap.addAll($ \Call {BuildPlan}{$prefsum, midV, endV$})} 
 \EndIf
 
 \State \textbf{return} $resultMap$
@@ -165,8 +164,8 @@
 	\State process vertices sequentally 	
 \Else	
 	\State $midV \gets planMap[startV][endV]$ 
-	\State $ProcessLayer(G, planMap, prefsum, startV, midV)$
-	\State $ProcessLayer(G, planMap, prefsum, midV, endV)$	
+	\State {\Call {ProcessLayer}{$G, planMap, prefsum, startV, midV$}}
+	\State {\Call {ProcessLayer}{$G, planMap, prefsum, midV, endV$}}
 \EndIf
 
 \EndProcedure
@@ -185,10 +184,10 @@
 \Procedure{BellmanFordPar3}{$G,start$}
 \State $dist\gets \left\{ {\infty ... \infty}\right\}$
 \State $dist[start] \gets 0$
-\State $Frontier \gets \left\{ {start}\right\}$\Comment{структура данных для хранения исходящих ребер текущего множества } 
+\State {$Frontier \gets \left\{ {G.edgesFrom(start)}\right\}$}\Comment{структура данных для хранения исходящих ребер текущего множества } 
 
 \For{$i = 0$ to $|G.vertices| $}	
-	\State $Frontier \gets handleFrontier(Frontier)$ \Comment{релаксируем ребра из фронтира и строим новый} 
+	\State {$Frontier \gets $  {\Call {HandleFrontier}{$Frontier$}}} \Comment{релаксируем ребра из фронтира и строим новый} 
 	
 	\If { $Frontier.empty()$} 
 		\State $break$						
