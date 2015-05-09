@@ -59,7 +59,7 @@
 	
 	\For{$v \in CurrentVertexSet$}
 		\For{$e \in G.edgesFrom[v] $} \Comment{исходящие ребра из текущей вершины} 
-			\If {$dist[e.to] < dist[e.from] + e.w$} 
+			\If {$dist[e.to] > dist[e.from] + e.w$} 
 				\State $dist[e.to] \gets dist[e.from] + e.w$
 				\State $NextVertexSet.insert(e.to)$								
 			\EndIf

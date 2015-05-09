@@ -1,3 +1,7 @@
 \beamer@endinputifotherversion {3.33pt}
-\beamer@sectionintoc {1}{Elements}{4}{0}{1}
-\beamer@sectionintoc {2}{Conclusion}{18}{0}{2}
+\select@language {russian}
+\beamer@sectionintoc {1}{Проблема и задача}{2}{0}{1}
+\beamer@sectionintoc {2}{Задача one-to-many}{5}{0}{2}
+\beamer@sectionintoc {3}{Задача many-to-many}{14}{0}{3}
+\beamer@sectionintoc {4}{Результаты}{19}{0}{4}
+\beamer@sectionintoc {5}{Выводы}{22}{0}{5}

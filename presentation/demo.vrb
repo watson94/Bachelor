@@ -1,10 +1,6 @@
-\frametitle{Typography}
-      \begin{minted}[fontsize=\small]{latex}
-The theme provides sensible defaults to \emph{emphasis}
-text, \alert{accent} parts or show \textbf{bold} results.
-      \end{minted}
-
-  \begin{center}becomes\end{center}
-
-  The theme provides sensible defaults to \emph{emphasis} text,
-  \alert{accent} parts or show \textbf{bold} results.
+\frametitle{Алгоритм для социальных графов}
+  \begin{itemize}
+    \item Основан на теории "Шести рукопожатий"
+    \item Работает не неориентированных невзвешенных социальных графах
+    \item Использует динамическое программирование
+  \end{itemize}
