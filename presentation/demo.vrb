@@ -1,6 +1,17 @@
-\frametitle{Алгоритм для социальных графов}
-  \begin{itemize}
-    \item Основан на теории "Шести рукопожатий"
-    \item Работает не неориентированных невзвешенных социальных графах
-    \item Использует динамическое программирование
-  \end{itemize}
+\frametitle{Расстояние между каждой парой вершин социального графа}
+
+\begin{table}
+\centering
+
+\begin{tabular}{l|c}
+Алгоритм & Twitter graph\\
+\hline\hline
+Наивная параллельная версия & 427.217 \\
+Алгоритм для социальных графов & 210.322  \\
+\hline
+\end{tabular}
+
+\caption{Сравнение алгоритмов}
+\label {table:algo_floyd_comparison}
+\end{table}
+

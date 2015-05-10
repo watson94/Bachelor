@@ -195,40 +195,110 @@
   \begin{itemize}
     \item Основан на теории "Шести рукопожатий"
     \item Работает не неориентированных невзвешенных социальных графах
-    \item Использует динамическое программирование
+    \item Использует идею динамического программирования
   \end{itemize}
 \end{frame}
 
-\section{Результаты}
-\begin{frame}{Tables}
-  \begin{table}
-    \caption{Largest cities in the world (source: Wikipedia)}
-    \begin{tabular}{lr}
-      \toprule
-      City & Population\\
-      \midrule
-      Mexico City & 20,116,842\\
-      Shanghai & 19,210,000\\
-      Peking & 15,796,450\\
-      Istanbul & 14,160,467\\
-      \bottomrule
-    \end{tabular}
-  \end{table}
+\begin{frame}[fragile]
+  \frametitle{Идея}
+    {\vspace{-2em}\begin{center}\includegraphics[width=0.8\textwidth,height=0.8\textheight]{images/floyd_social_1.png}\end{center}}
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Идея}
+    {\vspace{-2em}\begin{center}\includegraphics[width=0.8\textwidth,height=0.8\textheight]{images/floyd_social_2.png}\end{center}}
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Динамика для большего множества}
+    \begin{itemize}
+    	\item Посчитаем расстояние от базовой вершины до всех других
+    	\item Каждая из вершин $u$ может находится только в $[dist[base][u]-K, dist[base][u]+K]$ слоях
+		\item Будем поддерживать две динамики $mask$ и $calc$. Причем $mask[u][i]$ - сабсет вершин, расстояние от которых до $u$ равно $i$. В свою очередь $calc[u][i]$ - не более $i$
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Пересчет значении динамики}
+\begin{equation}
+mask[v][i] = \neg calc[v][i - 1] \wedge \bigvee_{\exists (u, v) \in E} mask[u][i - 1] 
+\end{equation}
+
+\begin{equation}
+calc[v][i] = calc[v][i - 1] \vee mask[v][i]
+\end{equation}
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Преимущества подхода}
+\begin{itemize}
+  \item Пересчет расстояний для группы вершин выполняется быстрее за счет битовых операций.   
+  \item Все битовые операции выполняются без выделения дополнительной памяти. 
+  \item Нет необходимости в построении следующего фронтира по предыдущему в процессе обработки
+  \item Каждый из получившихся фронтиров довольно большой, что увеличивает его способность к 
+  \item Все остальные этапы также хорошо параллелятся
+\end{itemize}
+
 \end{frame}
 
 
-\begin{frame}{Summary}
+\section{Результаты}
 
-  Get the source of this theme and the demo presentation from
+\begin{frame}[fragile]
+  \frametitle{Сравнение параллельных версий Беллмана-Форда}
+\begin{table}
+\centering
+\begin{tabular}{l|ccc|cc|cc}  
+Algo №& \multicolumn{3}{c}{Complete} & \multicolumn{2}{c}{BalancedTree} & \multicolumn{2}{c}{SquareGrid} \\
+& TS & + & - & 0.5 & 1 & + & +- \\
+\hline\hline
+1 & 2.43 & 4.65 & nc & 116.31 & 9.04 & 5.49 & 13.40\\  
+2 & 5.17 & 0.18 & 10.84 & 3.59 & 3.08 & 5.92 & 7.10  \\
+3 & 44.63 & 0.37 & 23.55 & 0.44 & 0.31 & 4.42 & 0.58 \\
+\end{tabular}
+\caption{Типичные графы}
+\label{graph_description}
+\end{table}
 
-  \begin{center}\url{github.com/matze/mtheme}\end{center}
 
-  The theme \emph{itself} is licensed under a
-  \href{http://creativecommons.org/licenses/by-sa/4.0/}{Creative Commons
-  Attribution-ShareAlike 4.0 International License}.
+\begin{table}
+\centering
+\begin{tabular}{l|ccc|ccc}  
+Algo №& \multicolumn{3}{c}{RandomSparse} & \multicolumn{3}{c}{RandomDense}\\
+& 0.5+  & 0.5- & 0.96+ & 0.5+ & 0.5- & 0.96+\\
+\hline\hline
+1 & nc & nc & 24.35 & nc & nc & 5.01 \\  
+2 & 2.77 & 14.68 & 2.42 & 0.48  & 6.38  & 0.46 \\
+3 & 0.98 & 22.59 & 0.76  & 0.60  & 10.25 & 0.71 \\
+\end{tabular}
+\caption{Случайные графы}
+\label{graph_description}
+\end{table}
 
-  \begin{center}\ccbysa\end{center}
+\end{frame}
 
+
+\begin{frame}[fragile]
+  \frametitle{Расстояние между каждой парой вершин социального графа}
+
+\begin{table}
+\centering
+
+\begin{tabular}{l|c}  
+Алгоритм & Twitter graph\\
+\hline\hline
+Наивная параллельная версия & 427.217 \\  
+Алгоритм для социальных графов & 210.322  \\
+\hline
+\end{tabular}
+
+\caption{Сравнение алгоритмов}
+\label {table:algo_floyd_comparison}
+\end{table}
+  
 \end{frame}
 
 \section{Выводы}

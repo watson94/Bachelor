@@ -3,5 +3,5 @@
 \beamer@sectionintoc {1}{Проблема и задача}{2}{0}{1}
 \beamer@sectionintoc {2}{Задача one-to-many}{5}{0}{2}
 \beamer@sectionintoc {3}{Задача many-to-many}{14}{0}{3}
-\beamer@sectionintoc {4}{Результаты}{19}{0}{4}
-\beamer@sectionintoc {5}{Выводы}{22}{0}{5}
+\beamer@sectionintoc {4}{Результаты}{24}{0}{4}
+\beamer@sectionintoc {5}{Выводы}{27}{0}{5}
