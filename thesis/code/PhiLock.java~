@@ -1,8 +1,8 @@
 
 
 Class A {
-	final Object Lock1 = new Object();
-	final Object Lock2 = new Object();
+	final Object lock1 = new Object();
+	final Object lock2 = new Object();
 	void a() {
 		Object lock;
 		if (System.currentTimeMilis() % 10000 == 0) {

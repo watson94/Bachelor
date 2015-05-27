@@ -1,0 +1,16 @@
+public void a()
+    {
+        r0 := @this;
+        b0 = 5;
+        i1 = 0;
+     label1:
+        i1_1 = Phi(i1 #0, i1_2 #1);
+        if b0 <= 5 goto label2;
+        $i2 = b0 - 1;
+        i1_2 = i1_1 + $i2;
+        goto label1;
+     label2:
+        $r1 = java.lang.System.out;
+        $r1.println(i1_1);
+        return;
+    }

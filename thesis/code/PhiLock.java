@@ -11,7 +11,7 @@ Class A {
 			lock = lock2;
 		}
 		syncronized(lock) {
-			/* some code */
+			// some code
 		}
 	}
 }
