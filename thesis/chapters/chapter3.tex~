@@ -67,6 +67,7 @@ Tomcat & 7600 & 390 & 5,1 \\
 \\
 \\
 \\
+\\
 \lstinputlisting[caption=Использование syncronized методов, language=Java, label=Pattern1]{code/Pattern1.java}
 \lstinputlisting[caption=Использование блокировки для синхронизации, language=Java, label=Pattern2]{code/Pattern2.java}
 \lstinputlisting[caption=Использование блокировки для синхронизации, language=Java, label=Pattern3]{code/Pattern3.java}
