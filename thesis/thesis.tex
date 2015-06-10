@@ -40,7 +40,7 @@
 \usepackage{algpseudocode}
 \usepackage{multirow}
 \usepackage[justification=centering]{caption}
-
+\usepackage{caption}
 
 \definecolor{mygreen}{rgb}{0,0.6,0}
 \definecolor{mygray}{rgb}{0.5,0.5,0.5}
@@ -252,6 +252,17 @@
           \end{center}
         \end{figure}
 }
+
+\def\drawfigurexcap#1#2#3#4{
+        \begin{figure}[ht]
+          \begin{center}
+            \putImgx{#4}{#1}
+            \label{#3}
+	    #2
+          \end{center}
+        \end{figure}
+}
+
 
 % Chapters
 \startthechapters
