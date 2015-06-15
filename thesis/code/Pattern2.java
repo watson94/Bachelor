@@ -6,7 +6,7 @@ public class A {
             //operations with o
         }
     }
-    public synchronized void b() {
+    public void b() {
         synchronized (LOCK) {
             //operations with o
         }
